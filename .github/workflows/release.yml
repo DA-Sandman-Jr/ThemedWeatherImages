@@ -9,6 +9,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    # Trusted Publishing: no long-lived API key. The job's OIDC token is
+    # exchanged for a one-hour nuget.org API key against the trusted publishing
+    # policy configured on nuget.org (repository owner DA-Sandman-Jr,
+    # repository ThemedWeatherImages, workflow file release.yml).
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -17,15 +25,6 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
-
-      - name: Validate release configuration
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          if [ -z "$NUGET_API_KEY" ]; then
-            echo "NUGET_API_KEY secret is not configured."
-            exit 1
-          fi
 
       - name: Derive version from tag
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
@@ -42,9 +41,16 @@ jobs:
       - name: Pack
         run: dotnet pack ThemedWeatherImages.sln --configuration Release --no-build -p:Version="$VERSION" --output ./nupkgs
 
+      # Request the temp key right before the push; it expires after an hour.
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push packages to nuget.org
         run: |
           dotnet nuget push "nupkgs/*.nupkg" \
-            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate

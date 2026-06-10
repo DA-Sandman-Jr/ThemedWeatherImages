@@ -57,7 +57,7 @@ A handful of connectivity tests hit live services and only run when their enviro
 
 ## Releasing
 
-CI (`.github/workflows/ci.yml`) builds, tests, and packs on every push and PR. Pushing a tag like `v1.2.0` runs `release.yml`, which packs both packages at version `1.2.0` and pushes them to nuget.org (requires the `NUGET_API_KEY` repository secret).
+CI (`.github/workflows/ci.yml`) builds, tests, and packs on every push and PR. Pushing a tag like `v1.2.0` runs `release.yml`, which packs both packages at version `1.2.0` and pushes them to nuget.org via [Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing): a nuget.org policy for this repository's `release.yml` exchanges the workflow's OIDC token for a one-hour API key, so no long-lived publishing secret exists. The `NUGET_USER` repository secret holds the nuget.org profile name the policy belongs to.
 
 ## History
 

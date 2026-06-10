@@ -63,4 +63,4 @@ Functions hosts bind: `AzureWebJobsStorage`, `AI_HORDE_API_KEY`, `AI_HORDE_API_U
 
 ## Releases
 
-Pushing a `vX.Y.Z` tag on `main` runs `.github/workflows/release.yml`, which packs both packages at that version and pushes them to nuget.org using the `NUGET_API_KEY` repository secret. `ci.yml` builds, tests, and packs on every push and pull request.
+Pushing a `vX.Y.Z` tag on `main` runs `.github/workflows/release.yml`, which packs both packages at that version and pushes them to nuget.org via Trusted Publishing: `NuGet/login@v1` exchanges the job's OIDC token (`permissions: id-token: write`) for a one-hour API key against the nuget.org policy registered for this repository's `release.yml`. The `NUGET_USER` secret holds the nuget.org profile name; there is no long-lived API key to rotate. `ci.yml` builds, tests, and packs on every push and pull request.
