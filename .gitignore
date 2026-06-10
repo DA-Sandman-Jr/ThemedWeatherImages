@@ -1,0 +1,24 @@
+# Build output
+bin/
+obj/
+artifacts/
+nupkgs/
+*.nupkg
+*.snupkg
+
+# IDE / user state
+.vs/
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+
+# Test results
+TestResults/
+
+# Azure Functions local configuration should not be committed.
+local.settings.json
+
+# Service dependency descriptors are generated locally by tooling.
+**/Properties/serviceDependencies.json
+**/Properties/serviceDependencies.local.json

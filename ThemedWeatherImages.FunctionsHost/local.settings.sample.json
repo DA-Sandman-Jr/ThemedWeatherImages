@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "AI_HORDE_API_KEY": "0000000000",
+    "AI_HORDE_API_URL": "https://stablehorde.net/api",
+    "WEBHOOK_URL": "https://example.test/api/aihorde-webhook",
+    "THEMED_WEATHER_IMAGES_GENERATION_SCHEDULE": "0 0 * * * *",
+    "ThemedWeatherImages__Theme__DisplayName": "Weather Fox",
+    "ThemedWeatherImages__Theme__SubjectName": "fox",
+    "ThemedWeatherImages__Theme__SubjectSlug": "fox",
+    "ThemedWeatherImages__Theme__ImageFileNamePrefix": "fox",
+    "ThemedWeatherImages__Images__BlobContainerName": "fox-images",
+    "ThemedWeatherImages__Generation__PromptTemplate": "A {Category} day, with a {Subject}. Emphasize the weather."
+  }
+}

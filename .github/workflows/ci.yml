@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-test-pack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore ThemedWeatherImages.sln
+
+      - name: Build
+        run: dotnet build ThemedWeatherImages.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test ThemedWeatherImages.sln --configuration Release --no-build --verbosity minimal
+
+      - name: Pack
+        run: dotnet pack ThemedWeatherImages.sln --configuration Release --no-build --output ./nupkgs
+
+      - name: Verify both packages were produced
+        run: |
+          test -f ./nupkgs/ThemedWeatherImages.1.0.0.nupkg
+          test -f ./nupkgs/ThemedWeatherImages.Functions.1.0.0.nupkg
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkgs
+          path: nupkgs/*.nupkg

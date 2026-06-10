@@ -1,0 +1,50 @@
+name: Release to NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Validate release configuration
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "NUGET_API_KEY secret is not configured."
+            exit 1
+          fi
+
+      - name: Derive version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Restore
+        run: dotnet restore ThemedWeatherImages.sln
+
+      - name: Build
+        run: dotnet build ThemedWeatherImages.sln --configuration Release --no-restore -p:Version="$VERSION"
+
+      - name: Test
+        run: dotnet test ThemedWeatherImages.sln --configuration Release --no-build --verbosity minimal
+
+      - name: Pack
+        run: dotnet pack ThemedWeatherImages.sln --configuration Release --no-build -p:Version="$VERSION" --output ./nupkgs
+
+      - name: Push packages to nuget.org
+        run: |
+          dotnet nuget push "nupkgs/*.nupkg" \
+            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
