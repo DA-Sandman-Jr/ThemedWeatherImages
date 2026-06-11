@@ -1,7 +1,9 @@
 #nullable enable
 
+using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ThemedWeatherImages.Services;
 using ThemedWeatherImages.Tests.Helpers;
 using Xunit;
 
@@ -41,6 +43,30 @@ public class WeatherServiceParsingTests
         await service.GetCurrentWeatherAsync("key", "2.3.4.5", null, null);
 
         Assert.Contains("q=2.3.4.5", handler.LastRequest!.RequestUri!.Query);
+    }
+
+    [Fact]
+    public void Map_FormatsTemperaturesWithInvariantCulture()
+    {
+        string json = "{\"location\":{\"name\":\"Berlin\",\"country\":\"Germany\"},\"current\":{\"temp_f\":91.8,\"temp_c\":33.2,\"condition\":{\"text\":\"Sunny\",\"code\":1000}}}";
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            // A comma-decimal host culture must not leak into the response
+            // contract; the production host once serialized "33,2" here.
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+
+            WeatherResponse result = WeatherApiResponseMapper.Map(json);
+
+            Assert.Equal("33.2", result.TemperatureCelsius);
+            Assert.Equal("91.8", result.TemperatureFahrenheit);
+            Assert.Equal("33.2°C", result.DisplayTemperature);
+            Assert.Contains("33.2°C", result.ResponseSummary);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 
     [Fact]
