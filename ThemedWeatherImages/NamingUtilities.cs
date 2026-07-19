@@ -16,8 +16,9 @@ public interface INamingUtilities
 
 public sealed class NamingUtilities : INamingUtilities
 {
-    private static readonly Regex InvalidCharacters = new("[^a-z0-9-]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    private static readonly Regex CollapseHyphens = new("-{2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(1);
+    private static readonly Regex InvalidCharacters = new("[^a-z0-9-]", RegexOptions.Compiled | RegexOptions.CultureInvariant, RegexTimeout);
+    private static readonly Regex CollapseHyphens = new("-{2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant, RegexTimeout);
 
     private readonly IOptions<ThemedWeatherImagesOptions> _options;
 

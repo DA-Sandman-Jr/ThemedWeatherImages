@@ -56,4 +56,4 @@ IHost host = Host.CreateDefaultBuilder()
     })
     .Build();
 
-host.Run();
+await host.RunAsync();

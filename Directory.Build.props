@@ -21,4 +21,8 @@
     <RepositoryUrl>https://github.com/DA-Sandman-Jr/ThemedWeatherImages</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="B44.Standards" Version="0.4.5" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

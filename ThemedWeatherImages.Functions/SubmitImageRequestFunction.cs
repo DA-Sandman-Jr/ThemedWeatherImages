@@ -9,13 +9,16 @@ public sealed class SubmitImageRequestFunction
 {
     private readonly ImageGenerationService _generationService;
     private readonly INamingUtilities _namingUtilities;
+    private readonly TimeProvider _timeProvider;
 
     public SubmitImageRequestFunction(
         ImageGenerationService generationService,
-        INamingUtilities namingUtilities)
+        INamingUtilities namingUtilities,
+        TimeProvider timeProvider)
     {
         _generationService = generationService;
         _namingUtilities = namingUtilities;
+        _timeProvider = timeProvider;
     }
 
     [Function("SubmitImageRequestManual")]
@@ -26,12 +29,12 @@ public sealed class SubmitImageRequestFunction
     {
         ILogger logger = context.GetLogger("SubmitImageRequestManual");
         string expectedSlug = _namingUtilities.GetSubjectSlug();
-        ManualTriggerRequest manualRequest = await ManualTriggerRequest.ParseAsync(req, logger, expectedSlug, subject, context.CancellationToken);
+        ManualTriggerRequest manualRequest = await ManualTriggerRequest.ParseAsync(req, logger, expectedSlug, subject, _timeProvider, context.CancellationToken);
 
         if (!manualRequest.IsValid)
         {
             HttpResponseData badRequest = req.CreateResponse(System.Net.HttpStatusCode.BadRequest);
-            await badRequest.WriteStringAsync(manualRequest.ValidationError ?? "Invalid request payload.");
+            await badRequest.WriteStringAsync(manualRequest.ValidationError ?? "Invalid request payload.", context.CancellationToken);
             return badRequest;
         }
 

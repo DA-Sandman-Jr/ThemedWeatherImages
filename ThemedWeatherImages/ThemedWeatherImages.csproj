@@ -7,6 +7,7 @@
     <Description>Reusable ASP.NET Core services and controllers for pairing current weather conditions with pre-generated themed daily images: WeatherAPI lookup, condition categorization, and blob-backed image proxying. The consuming host supplies the theme; the library ships no theme defaults.</Description>
     <PackageTags>weather;images;aspnetcore;weatherapi</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <B44Deterministic>true</B44Deterministic>
   </PropertyGroup>
 
   <ItemGroup>

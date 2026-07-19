@@ -9,13 +9,16 @@ public sealed class ScheduledImageRequestFunction
 {
     private readonly IScheduledImageRequestControlStore _controlStore;
     private readonly ImageGenerationService _generationService;
+    private readonly TimeProvider _timeProvider;
 
     public ScheduledImageRequestFunction(
         ImageGenerationService generationService,
-        IScheduledImageRequestControlStore controlStore)
+        IScheduledImageRequestControlStore controlStore,
+        TimeProvider timeProvider)
     {
         _generationService = generationService;
         _controlStore = controlStore;
+        _timeProvider = timeProvider;
     }
 
     [Function("SubmitImageRequestScheduled")]
@@ -25,13 +28,15 @@ public sealed class ScheduledImageRequestFunction
     {
         ILogger logger = context.GetLogger("SubmitImageRequestScheduled");
 
-        if (await _controlStore.IsDisabledAsync(DateTimeOffset.UtcNow, context.CancellationToken))
+        DateTimeOffset requestedAt = _timeProvider.GetUtcNow();
+
+        if (await _controlStore.IsDisabledAsync(requestedAt, context.CancellationToken))
         {
-            logger.LogWarning("Scheduled image generation skipped because the budget kill switch is active.");
+            logger.ScheduledGenerationSkipped();
             return;
         }
 
-        DateTime utcNow = DateTime.UtcNow;
+        DateTime utcNow = requestedAt.UtcDateTime;
 
         var request = new ImageGenerationRequest(
             utcNow.Hour,
@@ -45,8 +50,7 @@ public sealed class ScheduledImageRequestFunction
             request,
             context.CancellationToken);
 
-        logger.LogInformation(
-            "Scheduled image generation completed. Submitted={Submitted}, Skipped={Skipped}, Failed={Failed}",
+        logger.ScheduledGenerationCompleted(
             results.Count(r => string.Equals(r.Status, GenerationStatus.Submitted, StringComparison.Ordinal)),
             results.Count(r => string.Equals(r.Status, GenerationStatus.Skipped, StringComparison.Ordinal)),
             results.Count(r => string.Equals(r.Status, GenerationStatus.Failed, StringComparison.Ordinal)));

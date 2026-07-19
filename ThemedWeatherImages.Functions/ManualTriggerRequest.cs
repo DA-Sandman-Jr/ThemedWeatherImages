@@ -10,12 +10,14 @@ namespace ThemedWeatherImages.Functions;
 internal sealed class ManualTriggerRequest
 {
     private readonly List<DateTime> _dates = new();
+    private readonly TimeProvider _timeProvider;
 
-    private ManualTriggerRequest(string expectedSubjectSlug)
+    private ManualTriggerRequest(string expectedSubjectSlug, TimeProvider timeProvider)
     {
+        _timeProvider = timeProvider;
         ExpectedSubjectSlug = expectedSubjectSlug;
         SubjectSlug = expectedSubjectSlug;
-        EffectiveHour = DateTime.UtcNow.Hour;
+        EffectiveHour = _timeProvider.GetUtcNow().Hour;
         IsValid = true;
     }
 
@@ -36,9 +38,10 @@ internal sealed class ManualTriggerRequest
         ILogger logger,
         string expectedSubjectSlug,
         string? routeSubject,
+        TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
-        var manualRequest = new ManualTriggerRequest(expectedSubjectSlug);
+        var manualRequest = new ManualTriggerRequest(expectedSubjectSlug, timeProvider);
 
         if (manualRequest.IsValid && !string.IsNullOrWhiteSpace(routeSubject))
         {
@@ -132,7 +135,7 @@ internal sealed class ManualTriggerRequest
         }
         catch (JsonException ex)
         {
-            logger.LogWarning(ex, "Failed to parse manual trigger request body as JSON.");
+            logger.FailedToParseManualTriggerBody(ex);
             MarkInvalid("Malformed JSON payload.");
         }
     }
@@ -144,9 +147,9 @@ internal sealed class ManualTriggerRequest
             return;
         }
 
-        if (!_dates.Any())
+        if (_dates.Count == 0)
         {
-            DateTime utcNow = DateTime.UtcNow;
+            DateTime utcNow = _timeProvider.GetUtcNow().UtcDateTime;
             _dates.Add(utcNow);
             _dates.Add(utcNow.AddDays(1));
         }
@@ -289,7 +292,7 @@ internal sealed class ManualTriggerRequest
             }
         }
 
-        if (!_dates.Any())
+        if (_dates.Count == 0)
         {
             MarkInvalid("At least one valid date is required when specifying the dates array.");
         }

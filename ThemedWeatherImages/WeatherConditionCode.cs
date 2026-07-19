@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace ThemedWeatherImages;
 
 public enum WeatherConditionCode
@@ -5,7 +7,10 @@ public enum WeatherConditionCode
     // Clear/Sunny Conditions
     Sunny = 1000,
 
-    Clear = 1000, // Clear is the night-time equivalent of Sunny
+    // Clear is the night-time equivalent of Sunny; the duplicate constant value
+    // is intentional so callers can express either name.
+    [SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Clear is an intentional alias for Sunny (day/night equivalents of the same condition).")]
+    Clear = 1000,
 
     // Cloudy Conditions
     PartlyCloudy = 1003,

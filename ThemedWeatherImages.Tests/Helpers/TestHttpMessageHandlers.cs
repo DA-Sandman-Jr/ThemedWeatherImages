@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ThemedWeatherImages.Tests.Helpers;
 
-internal class FakeHttpMessageHandler : HttpMessageHandler
+internal sealed class FakeHttpMessageHandler : HttpMessageHandler
 {
     private readonly string _content;
 
@@ -30,7 +30,7 @@ internal class FakeHttpMessageHandler : HttpMessageHandler
     }
 }
 
-internal class ErrorHttpMessageHandler : HttpMessageHandler
+internal sealed class ErrorHttpMessageHandler : HttpMessageHandler
 {
     private readonly HttpStatusCode _statusCode;
 
@@ -46,7 +46,7 @@ internal class ErrorHttpMessageHandler : HttpMessageHandler
     }
 }
 
-internal class ResponseHttpMessageHandler : HttpMessageHandler
+internal sealed class ResponseHttpMessageHandler : HttpMessageHandler
 {
     private readonly HttpResponseMessage _response;
 
@@ -67,7 +67,7 @@ internal class ResponseHttpMessageHandler : HttpMessageHandler
     }
 }
 
-internal class ThrowingHttpMessageHandler : HttpMessageHandler
+internal sealed class ThrowingHttpMessageHandler : HttpMessageHandler
 {
     private readonly Exception _exception;
 

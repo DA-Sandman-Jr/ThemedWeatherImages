@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ThemedWeatherImages.Tests.Helpers;
 
-internal class FakeLogger<T> : ILogger<T>
+internal sealed class FakeLogger<T> : ILogger<T>
 {
     public IDisposable BeginScope<TState>(TState state) where TState : notnull => NullScope.Instance;
 

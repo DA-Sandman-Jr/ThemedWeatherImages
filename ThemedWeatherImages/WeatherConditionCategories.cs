@@ -2,7 +2,7 @@ namespace ThemedWeatherImages;
 
 public static class WeatherConditionCategories
 {
-    public static readonly Dictionary<string, List<WeatherConditionCode>> ConditionGroups = new()
+    public static readonly Dictionary<string, List<WeatherConditionCode>> ConditionGroups = new(StringComparer.Ordinal)
     {
         {
             "Clear/Sunny", new List<WeatherConditionCode>
