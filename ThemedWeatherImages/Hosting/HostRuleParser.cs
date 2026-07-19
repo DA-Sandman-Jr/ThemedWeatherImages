@@ -68,7 +68,7 @@ public static class HostRuleParser
         error = null;
 
         int colonIndex = value.LastIndexOf(':');
-        if (colonIndex > -1 && colonIndex < value.Length - 1 && value.IndexOf(']', StringComparison.Ordinal) == -1)
+        if (colonIndex > -1 && colonIndex < value.Length - 1 && !value.Contains(']', StringComparison.Ordinal))
         {
             host = value[..colonIndex];
             string portPart = value[(colonIndex + 1)..];
@@ -122,4 +122,8 @@ public readonly struct ParsedHostEntry : IEquatable<ParsedHostEntry>
     public override bool Equals(object? obj) => obj is ParsedHostEntry other && Equals(other);
 
     public override int GetHashCode() => HashCode.Combine(Host, Port, AllowSubdomains);
+
+    public static bool operator ==(ParsedHostEntry left, ParsedHostEntry right) => left.Equals(right);
+
+    public static bool operator !=(ParsedHostEntry left, ParsedHostEntry right) => !left.Equals(right);
 }

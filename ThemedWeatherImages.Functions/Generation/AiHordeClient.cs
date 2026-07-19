@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ThemedWeatherImages.Functions;
 
 namespace ThemedWeatherImages.Functions.Generation;
 
@@ -58,8 +59,7 @@ public sealed class AiHordeClient : IAiHordeClient
         };
 
         string rawPayload = JsonSerializer.Serialize(payload, CamelCaseOptions);
-        _logger.LogInformation(
-            "Submitting AI Horde generation for '{Category}' on {DateTag} using model {Model}, sampler {SamplerName}, size {Width}x{Height}.",
+        _logger.SubmittingGeneration(
             request.Category,
             request.DateTag,
             payload.Params.Model,
@@ -74,22 +74,18 @@ public sealed class AiHordeClient : IAiHordeClient
 
         using HttpResponseMessage response = await httpClient.PostAsync(_apiUrl, content, cancellationToken);
         string result = await response.Content.ReadAsStringAsync(cancellationToken);
-        _logger.LogInformation(
-            "Submitted generation for '{Category}' on {DateTag}: {StatusCode}",
-            request.Category,
-            request.DateTag,
-            response.StatusCode);
+        _logger.SubmittedGeneration(request.Category, request.DateTag, response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError("Generation submission failed: {Response}", result);
+            _logger.GenerationSubmissionFailed(result);
             return AiHordeSubmissionResult.Failed($"Generation submission failed: {response.StatusCode}");
         }
 
         using var json = JsonDocument.Parse(result);
         if (!json.RootElement.TryGetProperty("id", out JsonElement idElement))
         {
-            _logger.LogWarning("Response did not include 'id' field.");
+            _logger.GenerationResponseMissingId();
             return AiHordeSubmissionResult.Failed("Response did not include 'id' field.");
         }
 

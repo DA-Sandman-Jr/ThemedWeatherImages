@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using ThemedWeatherImages;
 
 namespace ThemedWeatherImages.Controllers;
 
@@ -76,7 +78,7 @@ public class WeatherImagesController : ControllerBase
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Unexpected status code {StatusCode} when retrieving {BlobUri}", response.StatusCode, blobLogUri);
+                _logger.UnexpectedImageStatusCode(response.StatusCode, blobLogUri);
                 return StatusCode((int)response.StatusCode);
             }
 
@@ -97,7 +99,7 @@ public class WeatherImagesController : ControllerBase
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error retrieving weather image from {BlobUri}", blobLogUri);
+            _logger.ErrorRetrievingWeatherImage(ex, blobLogUri);
             return StatusCode(StatusCodes.Status502BadGateway, "Error retrieving image from storage.");
         }
     }
@@ -129,7 +131,7 @@ public class WeatherImagesController : ControllerBase
         if (includeSasToken && !string.IsNullOrWhiteSpace(options.BlobSasToken))
         {
             string sasToken = options.BlobSasToken.Trim();
-            if (sasToken.StartsWith("?", StringComparison.Ordinal))
+            if (sasToken.StartsWith('?'))
             {
                 sasToken = sasToken[1..];
             }
@@ -156,7 +158,7 @@ public class WeatherImagesController : ControllerBase
 
         cacheControl.Extensions.Add(new NameValueHeaderValue(
             "stale-while-revalidate",
-            ((int)PublicImageCacheDuration.TotalSeconds).ToString()));
+            ((int)PublicImageCacheDuration.TotalSeconds).ToString(CultureInfo.InvariantCulture)));
 
         ResponseHeaders headers = Response.GetTypedHeaders();
         headers.CacheControl = cacheControl;

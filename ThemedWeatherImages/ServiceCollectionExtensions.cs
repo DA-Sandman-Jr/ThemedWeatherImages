@@ -34,6 +34,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(Options.Create(options));
         services.TryAddSingleton<INamingUtilities, NamingUtilities>();
         services.TryAddSingleton<IPromptBuilder, PromptBuilder>();
+        services.TryAddSingleton(TimeProvider.System);
         return services;
     }
 

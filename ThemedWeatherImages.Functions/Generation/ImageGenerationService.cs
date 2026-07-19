@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using ThemedWeatherImages.Functions;
 
 namespace ThemedWeatherImages.Functions.Generation;
 
@@ -32,7 +33,7 @@ public sealed class ImageGenerationService
         await _imageStore.EnsureReadyAsync(cancellationToken);
 
         string category = SelectCategoryForHour(request.EffectiveHour);
-        _logger.LogInformation("Selected category by UTC hour ({Hour}): {Category}", request.EffectiveHour, category);
+        _logger.SelectedCategoryForHour(request.EffectiveHour, category);
 
         string cleanCategory = NormalizeCategoryForFileName(category);
         string prefix = _namingUtilities.GetFileNamePrefix();
@@ -48,7 +49,7 @@ public sealed class ImageGenerationService
 
             if (!request.ForceRegeneration && await _imageStore.ImageExistsAsync(fileName, cancellationToken))
             {
-                _logger.LogInformation("{FileName} already exists, skipping.", fileName);
+                _logger.FileAlreadyExists(fileName);
                 results.Add(GenerationResult.Skipped(fileName, category, date, "Blob already exists."));
                 continue;
             }
@@ -67,12 +68,12 @@ public sealed class ImageGenerationService
 
                 string hordeId = submission.HordeId!;
                 await _imageStore.SaveRequestMappingAsync(hordeId, fileName, cancellationToken);
-                _logger.LogInformation("Mapped Horde ID '{HordeId}' to filename '{FileName}'", hordeId, fileName);
+                _logger.MappedHordeIdToFileName(hordeId, fileName);
                 results.Add(GenerationResult.Submitted(fileName, category, date, hordeId));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error submitting for '{Category}' on {DateTag}", category, dateTag);
+                _logger.ErrorSubmittingGeneration(ex, category, dateTag);
                 results.Add(GenerationResult.Failed(fileName, category, date, ex.Message));
             }
         }
@@ -101,5 +102,5 @@ public sealed class ImageGenerationService
     }
 
     private static string NormalizeCategoryForFileName(string category) =>
-        category.ToLowerInvariant().Replace(" ", "-").Replace("/", "-");
+        category.ToLowerInvariant().Replace(" ", "-", StringComparison.Ordinal).Replace("/", "-", StringComparison.Ordinal);
 }

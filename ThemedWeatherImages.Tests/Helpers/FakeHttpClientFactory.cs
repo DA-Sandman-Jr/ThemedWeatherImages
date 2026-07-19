@@ -3,7 +3,7 @@ using System.Net.Http;
 
 namespace ThemedWeatherImages.Tests.Helpers;
 
-internal class FakeHttpClientFactory : IHttpClientFactory
+internal sealed class FakeHttpClientFactory : IHttpClientFactory
 {
     private readonly HttpClient _client;
 
@@ -15,7 +15,7 @@ internal class FakeHttpClientFactory : IHttpClientFactory
     public HttpClient CreateClient(string name) => _client;
 }
 
-internal class SwitchingHttpClientFactory : IHttpClientFactory
+internal sealed class SwitchingHttpClientFactory : IHttpClientFactory
 {
     private readonly HttpClient _proxyClient;
     private readonly HttpClient _directClient;

@@ -8,6 +8,7 @@
     <Description>Azure Functions isolated-worker function classes for ThemedWeatherImages background image generation: scheduled and manual AI Horde submissions, webhook ingestion of generated images, and a budget kill switch. Reference from a Functions host project that supplies theme configuration.</Description>
     <PackageTags>azure-functions;weather;image-generation;ai-horde</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <B44Deterministic>true</B44Deterministic>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.10.0" />

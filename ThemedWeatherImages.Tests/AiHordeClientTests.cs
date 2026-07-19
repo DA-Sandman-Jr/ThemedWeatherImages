@@ -23,7 +23,7 @@ public class AiHordeClientTests
         var handler = new CapturingHandler();
         var httpClient = new HttpClient(handler);
         IConfigurationRoot configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
+            .AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.Ordinal)
             {
                 ["AI_HORDE_API_URL"] = "https://aihorde.example/generate",
                 ["AI_HORDE_API_KEY"] = "test-api-key",

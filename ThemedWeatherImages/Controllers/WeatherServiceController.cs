@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ThemedWeatherImages;
 
 namespace ThemedWeatherImages.Controllers;
 
@@ -83,7 +84,7 @@ public class WeatherServiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error while retrieving current weather.");
+            _logger.UnexpectedWeatherError(ex);
 
             var problem = new ProblemDetails
             {
@@ -130,22 +131,11 @@ public class WeatherServiceController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(upstreamBody))
         {
-            _logger.LogWarning(
-                exception,
-                "Weather API request failed with status code {StatusCode}. Proxy mode: {ProxyMode}. Upstream request: {UpstreamRequest}.",
-                statusCode,
-                proxyMode,
-                upstreamRequest);
+            _logger.WeatherApiFailure(exception, statusCode, proxyMode, upstreamRequest);
             return;
         }
 
-        _logger.LogWarning(
-            exception,
-            "Weather API request failed with status code {StatusCode}. Proxy mode: {ProxyMode}. Upstream request: {UpstreamRequest}. Upstream response body: {UpstreamResponseBody}",
-            statusCode,
-            proxyMode,
-            upstreamRequest,
-            upstreamBody);
+        _logger.WeatherApiFailureWithBody(exception, statusCode, proxyMode, upstreamRequest, upstreamBody);
     }
 
     private static void AddWeatherApiDiagnostics(ProblemDetails problem, HttpRequestException exception)

@@ -27,7 +27,7 @@ public class WeatherService
         string url = $"https://api.weatherapi.com/v1/current.json?key={apiKey}&q={queryParam}";
         string sanitizedUrl = WeatherApiUrlSanitizer.Sanitize(url);
 
-        _logger.LogDebug("Fetching current weather from Weather API using url {Url}", sanitizedUrl);
+        _logger.FetchingCurrentWeather(sanitizedUrl);
         WeatherApiResult apiResult = await _requestService.GetWeatherApiResponseAsync(url, sanitizedUrl).ConfigureAwait(false);
         using HttpResponseMessage response = apiResult.Response;
         string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);

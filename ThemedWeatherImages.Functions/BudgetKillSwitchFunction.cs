@@ -9,10 +9,12 @@ namespace ThemedWeatherImages.Functions;
 public sealed class BudgetKillSwitchFunction
 {
     private readonly IScheduledImageRequestControlStore _controlStore;
+    private readonly TimeProvider _timeProvider;
 
-    public BudgetKillSwitchFunction(IScheduledImageRequestControlStore controlStore)
+    public BudgetKillSwitchFunction(IScheduledImageRequestControlStore controlStore, TimeProvider timeProvider)
     {
         _controlStore = controlStore;
+        _timeProvider = timeProvider;
     }
 
     [Function("DisableScheduledImageRequestBudgetKillSwitch")]
@@ -24,24 +26,22 @@ public sealed class BudgetKillSwitchFunction
 
         try
         {
-            DateTimeOffset disabledAt = DateTimeOffset.UtcNow;
+            DateTimeOffset disabledAt = _timeProvider.GetUtcNow();
             DateTimeOffset disabledUntil = GetStartOfNextUtcMonth(disabledAt);
 
             await _controlStore.DisableUntilAsync(disabledAt, disabledUntil, context.CancellationToken);
-            logger.LogWarning(
-                "Budget kill switch disabled scheduled image generation until {DisabledUntil}.",
-                disabledUntil);
+            logger.BudgetKillSwitchDisabled(disabledUntil);
 
             HttpResponseData response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync($"Scheduled image generation is disabled until {disabledUntil:O}.");
+            await response.WriteStringAsync($"Scheduled image generation is disabled until {disabledUntil:O}.", context.CancellationToken);
             return response;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Budget kill switch failed to disable scheduled image generation.");
+            logger.BudgetKillSwitchFailed(ex);
 
             HttpResponseData response = req.CreateResponse(HttpStatusCode.InternalServerError);
-            await response.WriteStringAsync("Budget kill switch failed.");
+            await response.WriteStringAsync("Budget kill switch failed.", context.CancellationToken);
             return response;
         }
     }

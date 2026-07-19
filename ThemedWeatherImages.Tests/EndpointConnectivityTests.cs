@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -50,7 +51,7 @@ public class EndpointConnectivityTests
             hour = 0,
             force = false,
             subject = subjectSlug,
-            dates = new[] { DateTime.UtcNow.ToString("yyyy-MM-dd") }
+            dates = new[] { DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) }
         };
 
         using HttpClient client = CreateHttpClient();

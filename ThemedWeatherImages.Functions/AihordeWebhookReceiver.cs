@@ -43,7 +43,7 @@ public sealed class AihordeWebhookReceiver
     {
         CancellationToken cancellationToken = executionContext.CancellationToken;
         ILogger logger = executionContext.GetLogger("AihordeWebhookReceiver");
-        logger.LogInformation("Webhook received from AI Horde");
+        logger.WebhookReceived();
 
         string requestBody;
         using (var reader = new StreamReader(req.Body, leaveOpen: true))
@@ -65,18 +65,18 @@ public sealed class AihordeWebhookReceiver
 
         if (!_allowList.TryGetTrustedUri(webhookPayload.Img, out Uri? imageUri, out string? rejectionReason))
         {
-            logger.LogWarning("Rejected webhook payload. Reason: {Reason}. URI: {Img}", rejectionReason, webhookPayload.Img);
+            logger.RejectedWebhookPayload(rejectionReason, webhookPayload.Img);
             HttpResponseData invalidUriResponse = req.CreateResponse(HttpStatusCode.BadRequest);
             await invalidUriResponse.WriteStringAsync("Invalid image URI supplied.", cancellationToken);
             return invalidUriResponse;
         }
 
-        logger.LogInformation("Looking up Horde request ID: {RequestId}", webhookPayload.Request);
-        string? resolvedFilename = await _mappingStore.GetFilenameByHordeIdAsync(webhookPayload.Request);
+        logger.LookingUpHordeRequestId(webhookPayload.Request);
+        string? resolvedFilename = await _mappingStore.GetFilenameByHordeIdAsync(webhookPayload.Request, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(resolvedFilename))
         {
-            logger.LogError("No filename mapping found for Horde request ID: {RequestId}. Aborting.", webhookPayload.Request);
+            logger.NoFilenameMappingFound(webhookPayload.Request);
             HttpResponseData errorResponse = req.CreateResponse(HttpStatusCode.BadRequest);
             await errorResponse.WriteStringAsync("Missing filename mapping for Horde ID.", cancellationToken);
             return errorResponse;
@@ -85,7 +85,7 @@ public sealed class AihordeWebhookReceiver
         (byte[]? imageBytes, string? downloadError) = await TryDownloadImageAsync(imageUri, cancellationToken);
         if (imageBytes is null)
         {
-            logger.LogWarning("Unable to retrieve AI Horde image from {Uri}. Reason: {Reason}", imageUri, downloadError);
+            logger.UnableToRetrieveImage(imageUri, downloadError);
             HttpResponseData downloadFailed = req.CreateResponse(HttpStatusCode.BadGateway);
             await downloadFailed.WriteStringAsync("Failed to retrieve image from upstream host.", cancellationToken);
             return downloadFailed;

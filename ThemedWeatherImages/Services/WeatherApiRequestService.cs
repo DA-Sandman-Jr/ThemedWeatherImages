@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
+using ThemedWeatherImages;
 
 namespace ThemedWeatherImages.Services;
 
@@ -30,7 +31,7 @@ public class WeatherApiRequestService
         try
         {
             HttpClient proxyClient = _httpClientFactory.CreateClient("ProxyClient");
-            _logger.LogDebug("Requesting Weather API via proxy for {Url}", sanitizedUrl);
+            _logger.RequestingWeatherApiViaProxy(sanitizedUrl);
             response = await proxyClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
@@ -40,11 +41,11 @@ public class WeatherApiRequestService
                     HttpStatusCode statusCode = response.StatusCode;
                     response.Dispose();
                     response = null;
-                    _logger.LogWarning("Weather API returned status {StatusCode} via proxy for {Url}; retrying without proxy.", (int)statusCode, sanitizedUrl);
+                    _logger.WeatherApiProxyStatusRetrying((int)statusCode, sanitizedUrl);
                     return await GetWeatherApiResponseWithoutProxyAsync(url, sanitizedUrl, cancellationToken).ConfigureAwait(false);
                 }
 
-                _logger.LogWarning("Weather API returned status {StatusCode} via proxy for {Url}.", (int)response.StatusCode, sanitizedUrl);
+                _logger.WeatherApiProxyStatus((int)response.StatusCode, sanitizedUrl);
                 await WeatherApiErrorDecorator.ThrowDetailedHttpRequestExceptionAsync(response, ProxyModeProxyValue, sanitizedUrl).ConfigureAwait(false);
             }
 
@@ -55,7 +56,7 @@ public class WeatherApiRequestService
         {
             response?.Dispose();
             WeatherApiErrorDecorator.Decorate(ex, ProxyModeProxyValue, sanitizedUrl);
-            _logger.LogWarning(ex, "Weather API request via proxy failed for {Url}; retrying without proxy.", sanitizedUrl);
+            _logger.WeatherApiProxyRequestFailedRetrying(ex, sanitizedUrl);
             return await GetWeatherApiResponseWithoutProxyAsync(url, sanitizedUrl, cancellationToken).ConfigureAwait(false);
         }
         catch (HttpRequestException ex)
@@ -73,12 +74,12 @@ public class WeatherApiRequestService
 
         try
         {
-            _logger.LogDebug("Requesting Weather API without proxy for {Url}", sanitizedUrl);
+            _logger.RequestingWeatherApiWithoutProxy(sanitizedUrl);
             response = await client.GetAsync(url, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Weather API returned status {StatusCode} without proxy for {Url}.", (int)response.StatusCode, sanitizedUrl);
+                _logger.WeatherApiDirectStatus((int)response.StatusCode, sanitizedUrl);
                 await WeatherApiErrorDecorator.ThrowDetailedHttpRequestExceptionAsync(response, ProxyModeDirectValue, sanitizedUrl).ConfigureAwait(false);
             }
 

@@ -8,32 +8,41 @@ public static class WeatherApiResponseMapper
     public static WeatherResponse Map(string content)
     {
         var weatherData = JObject.Parse(content);
-        string? locationName = weatherData["location"]?["name"]?.ToString();
-        string? locationCountry = weatherData["location"]?["country"]?.ToString();
-        string? temperatureFahrenheit = FormatTemperature(weatherData["current"]?["temp_f"]);
-        string? temperatureCelsius = FormatTemperature(weatherData["current"]?["temp_c"]);
-        bool useFahrenheit = locationCountry is "United States of America" or "USA";
-        string displayTemperature = useFahrenheit
-            ? (temperatureFahrenheit ?? "N/A") + "\u00b0F"
-            : (temperatureCelsius ?? "N/A") + "\u00b0C";
+        JToken? location = weatherData["location"];
+        JToken? current = weatherData["current"];
+        JToken? condition = current?["condition"];
 
-        string? condition = weatherData["current"]?["condition"]?["text"]?.ToString();
-        string conditionCode = weatherData["current"]?["condition"]?["code"]?.ToString()
+        string? locationName = location?["name"]?.ToString();
+        string? locationCountry = location?["country"]?.ToString();
+        string? temperatureFahrenheit = FormatTemperature(current?["temp_f"]);
+        string? temperatureCelsius = FormatTemperature(current?["temp_c"]);
+        string displayTemperature = BuildDisplayTemperature(locationCountry, temperatureFahrenheit, temperatureCelsius);
+
+        string? conditionText = condition?["text"]?.ToString();
+        string conditionCode = condition?["code"]?.ToString()
             ?? throw new InvalidOperationException("Weather condition code is missing from API response.");
         string conditionCategory = WeatherConditionCategories.GetConditionCategory(conditionCode);
-        string responseSummary = $"The current temperature in {locationName} is {displayTemperature} with {condition} conditions.";
+        string responseSummary = $"The current temperature in {locationName} is {displayTemperature} with {conditionText} conditions.";
 
         return new WeatherResponse(
             locationName,
             displayTemperature,
             temperatureFahrenheit,
             temperatureCelsius,
-            condition,
+            conditionText,
             conditionCode,
             conditionCategory,
             locationCountry,
             responseSummary
         );
+    }
+
+    private static string BuildDisplayTemperature(string? locationCountry, string? temperatureFahrenheit, string? temperatureCelsius)
+    {
+        bool useFahrenheit = locationCountry is "United States of America" or "USA";
+        return useFahrenheit
+            ? (temperatureFahrenheit ?? "N/A") + "\u00b0F"
+            : (temperatureCelsius ?? "N/A") + "\u00b0C";
     }
 
     // Temperatures are part of the response contract and get parsed by
