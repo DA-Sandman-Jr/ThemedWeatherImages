@@ -37,7 +37,7 @@ Required values are validated at registration; missing ones fail startup with a 
 
 ## Functions host quick start
 
-The Functions package ships function classes only — you own the host. Create an isolated-worker project referencing the package, register the generation services, and bind your theme (see [ThemedWeatherImages.Functions/README.md](ThemedWeatherImages.Functions/README.md) for the service registrations and required app settings). The scheduled trigger reads its NCRONTAB schedule from the `THEMED_WEATHER_IMAGES_GENERATION_SCHEDULE` app setting.
+The Functions package ships function classes only — you own the host. Create an isolated-worker project referencing the package, call `AddThemedWeatherImageGenerationSupport`, register the remaining generation services, and bind your theme (see [ThemedWeatherImages.Functions/README.md](ThemedWeatherImages.Functions/README.md) for the complete registrations and required app settings). That shared registration supplies `TimeProvider.System` unless the host registered a custom `TimeProvider` first. The scheduled trigger reads its NCRONTAB schedule from the `THEMED_WEATHER_IMAGES_GENERATION_SCHEDULE` app setting.
 
 Working examples of both hosts live in this repository:
 

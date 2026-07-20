@@ -13,6 +13,13 @@ public sealed class ScheduledImageRequestFunction
 
     public ScheduledImageRequestFunction(
         ImageGenerationService generationService,
+        IScheduledImageRequestControlStore controlStore)
+        : this(generationService, controlStore, TimeProvider.System)
+    {
+    }
+
+    public ScheduledImageRequestFunction(
+        ImageGenerationService generationService,
         IScheduledImageRequestControlStore controlStore,
         TimeProvider timeProvider)
     {

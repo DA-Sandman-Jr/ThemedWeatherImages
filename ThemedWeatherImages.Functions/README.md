@@ -35,6 +35,8 @@ services.AddThemedWeatherImageGenerationSupport(options =>
 });
 ```
 
+`AddThemedWeatherImageGenerationSupport` registers `TimeProvider.System` only when the host has not already registered a `TimeProvider`. Register a custom provider before this call when the host needs controlled time. The function classes retain their pre-`TimeProvider` constructor overloads for compatibility, but hosts should use this registration so DI selects the injectable-time constructors.
+
 The configuration section names above are the host's choice — bind from whatever section your app owns. See `ThemedWeatherImages.FunctionsHost` in the repository for a complete reference host.
 
 ## Required app settings

@@ -11,6 +11,11 @@ public sealed class BudgetKillSwitchFunction
     private readonly IScheduledImageRequestControlStore _controlStore;
     private readonly TimeProvider _timeProvider;
 
+    public BudgetKillSwitchFunction(IScheduledImageRequestControlStore controlStore)
+        : this(controlStore, TimeProvider.System)
+    {
+    }
+
     public BudgetKillSwitchFunction(IScheduledImageRequestControlStore controlStore, TimeProvider timeProvider)
     {
         _controlStore = controlStore;

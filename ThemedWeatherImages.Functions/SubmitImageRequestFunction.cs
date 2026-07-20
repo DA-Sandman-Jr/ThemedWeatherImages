@@ -13,6 +13,13 @@ public sealed class SubmitImageRequestFunction
 
     public SubmitImageRequestFunction(
         ImageGenerationService generationService,
+        INamingUtilities namingUtilities)
+        : this(generationService, namingUtilities, TimeProvider.System)
+    {
+    }
+
+    public SubmitImageRequestFunction(
+        ImageGenerationService generationService,
         INamingUtilities namingUtilities,
         TimeProvider timeProvider)
     {
