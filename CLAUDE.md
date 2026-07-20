@@ -1,5 +1,17 @@
 # ThemedWeatherImages - Agent Instructions
 
+<!-- B44 ORGANIZATION GUIDANCE: START -->
+## B44 Organization Guidance
+
+- `AGENTS.md` files are auto-generated from sibling `CLAUDE.md` by the opt-in `B44.Standards` build target. Edit the `CLAUDE.md`, not the `AGENTS.md`.
+- Before editing or reviewing a file, read and follow every applicable `CLAUDE.md` from the repository root through that file's directory. Nearer instructions override broader instructions.
+- Analyzer severities live in the `B44.Standards` packaged globalconfig, never in a repository `.editorconfig`. Repository editorconfigs own style and whitespace only; tune analyzer policy upstream in the package.
+- Fix shared behavior in the B44 package that owns it, then deliberately update the consuming package version. Do not fork or paste a local copy into a consumer repository.
+- Treat roughly 350 physical lines as a review warning for production source files. New production files should normally stay at or below 500 lines; files above 650 lines require a clear cohesion-based reason.
+- Existing oversized files must not grow unless the same change performs a real extraction and leaves the file smaller. Coordinators coordinate; do not evade the limit with cosmetic partial classes, one-method services, generic utility dumping grounds, or needless factories.
+- Before automated analyzer fixes, baseline measurement, scripted bulk text rewrites, or consuming a freshly published package, read `.b44/B44.Tooling.md`.
+<!-- B44 ORGANIZATION GUIDANCE: END -->
+
 ThemedWeatherImages provides reusable .NET 8 building blocks for themed daily weather imagery: an ASP.NET Core read-side API (WeatherAPI lookup, condition categorization, blob-backed image proxying) and Azure Functions isolated-worker classes for background image generation via AI Horde. Both ship as NuGet packages; consumers supply every theme-specific value.
 
 ## Commands
@@ -50,7 +62,6 @@ dotnet run --project ThemedWeatherImages.Host
 - Preserve the documented route contracts `GET /api/weather-service/current` and `GET /api/weather-images/{fileName}` and the four function names unless a breaking change is intentional and documented — Before Forever After consumes both packages in production.
 - Do not commit secrets. `local.settings.json` is gitignored; `local.settings.sample.json` carries placeholders only.
 - Update `README.md` and the per-package README files when changing registration surface, routes, function names, or configuration keys.
-- `AGENTS.md` files are auto-generated from sibling `CLAUDE.md` on build via `Directory.Build.targets`. Edit the `CLAUDE.md`, not the `AGENTS.md`.
 - Run `scripts/install-hooks.sh` once per clone; the pre-commit hook runs `dotnet format --verify-no-changes` on staged C# files.
 
 ## Configuration Notes
