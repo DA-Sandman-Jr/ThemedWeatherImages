@@ -116,7 +116,8 @@ public sealed class AihordeWebhookReceiver
     {
         var handler = new HttpClientHandler
         {
-            AllowAutoRedirect = false
+            AllowAutoRedirect = false,
+            CheckCertificateRevocationList = true
         };
 
         var client = new HttpClient(handler)

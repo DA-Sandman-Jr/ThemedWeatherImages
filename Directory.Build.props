@@ -8,6 +8,8 @@
     <B44AgentSyncProject>$(MSBuildThisFileDirectory)ThemedWeatherImages\ThemedWeatherImages.csproj</B44AgentSyncProject>
 
     <Nullable>enable</Nullable>
+    <B44SecuritySensitive
+      Condition="'$(MSBuildProjectName)' == 'ThemedWeatherImages' or '$(MSBuildProjectName)' == 'ThemedWeatherImages.Functions'">true</B44SecuritySensitive>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- Surface editorconfig style/naming violations at build time so CI and
          local `dotnet build` catch drift instead of waiting for `dotnet format`. -->
@@ -31,6 +33,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="B44.Standards" Version="0.5.*" PrivateAssets="all" />
+    <PackageReference Include="B44.Standards" Version="0.6.*" PrivateAssets="all" />
   </ItemGroup>
 </Project>
